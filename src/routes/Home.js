@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 
 import Nweet from "components/Nweet";
-import { dbService } from "fbase";
+import { authService, dbService } from "fbase";
 import NweetFactory from "components/NweetFactory";
 
 const Home = ({ userObj }) => {
@@ -18,7 +18,8 @@ const Home = ({ userObj }) => {
     // };
     useEffect(() => {
         // getNweets();
-        dbService
+
+        const unsubscribe = dbService
             .collection("nweets")
             .orderBy("createdAt", "desc") // 최신순 정렬
             .onSnapshot((snapshot) => {
@@ -28,6 +29,11 @@ const Home = ({ userObj }) => {
                 }));
                 setNweets(nweetArray);
             });
+        authService.onAuthStateChanged((user) => {
+            if (user === null) {
+                unsubscribe();
+            }
+        });
     }, []);
     return (
         <div className="container">
