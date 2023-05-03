@@ -1,12 +1,17 @@
 import { useRef, useState } from "react";
-import { dbService, storageService } from "fbase";
 import { v4 as uuidv4 } from "uuid";
+import { dbService, storageService } from "fbase";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 const NweetFactory = ({ userObj }) => {
     const fileinput = useRef();
     const [nweet, setNweet] = useState("");
     const [attachment, setAttachment] = useState("");
     const onSubmit = async (event) => {
+        if (nweet === "") {
+            return;
+        }
         event.preventDefault();
         let attachmentUrl = "";
         if (attachment !== "") {
@@ -29,7 +34,7 @@ const NweetFactory = ({ userObj }) => {
         //     creatorId: userObj.uid,
         // });
         setNweet(""); // 저장 후 빈값
-        onClearAttachmentClick();
+        onClearAttachment();
     };
     const onChange = (event) => {
         const {
@@ -53,22 +58,54 @@ const NweetFactory = ({ userObj }) => {
         if (theFile) {
             reader.readAsDataURL(theFile); // 업로드 된 파일의 URL 주소를 얻는다.
         } else {
-            onClearAttachmentClick(); // 파일 업로드 취소
+            onClearAttachment(); // 파일 업로드 취소
         }
     };
-    const onClearAttachmentClick = () => {
+    const onClearAttachment = () => {
         setAttachment("");
         fileinput.current.value = null; // 파일 삭제 후 input에 남아 있는 value 삭제
     };
     return (
-        <form onSubmit={onSubmit}>
-            <input value={nweet} onChange={onChange} type="text" placeholder="What's on your mind?" maxLength={120} />
-            <input type="file" accept="image/*" onChange={onFileChange} ref={fileinput} />
-            <input type="submit" value="Nweet" />
+        <form onSubmit={onSubmit} className="factoryForm">
+            <div className="factoryInput__container">
+                <input
+                    className="factoryInput__input"
+                    value={nweet}
+                    onChange={onChange}
+                    type="text"
+                    placeholder="What's on your mind?"
+                    maxLength={120}
+                />
+                <input type="submit" value="&rarr;" className="factoryInput__arrow" />
+            </div>
+            <label htmlFor="attach-file" className="factoryInput__label">
+                <span>Add photos</span>
+                <FontAwesomeIcon icon={faPlus} />
+            </label>
+            <input
+                id="attach-file"
+                type="file"
+                accept="image/*"
+                onChange={onFileChange}
+                style={{
+                    opacity: 0,
+                }}
+                ref={fileinput}
+            />
+
             {attachment && (
-                <div>
-                    <img src={attachment} width="50px" height="50px" alt="" />
-                    <button onClick={onClearAttachmentClick}>Clear</button>
+                <div className="factoryForm__attachment">
+                    <img
+                        src={attachment}
+                        style={{
+                            backgroundImage: attachment,
+                        }}
+                        alt=""
+                    />
+                    <div className="factoryForm__clear" onClick={onClearAttachment}>
+                        <span>Remove</span>
+                        <FontAwesomeIcon icon={faTimes} />
+                    </div>
                 </div>
             )}
         </form>
